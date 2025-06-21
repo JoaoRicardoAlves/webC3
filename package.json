@@ -1,9 +1,23 @@
 {
+  "name": "dashboard-app",
+  "version": "1.0.0",
+  "description": "Full-stack dashboard application with NextJS, Express, Prisma",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:api\" \"npm run dev:frontend\"",
+    "dev:api": "cd api && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "start": "cd frontend && npm start",
+    "db:migrate": "cd api && npx prisma migrate dev",
+    "db:seed": "cd api && npm run prisma:seed",
+    "db:studio": "cd api && npx prisma studio"
+  },
   "dependencies": {
     "@prisma/client": "^6.10.1",
     "prisma": "^6.10.1"
   },
   "devDependencies": {
-    "@types/node": "^24.0.3"
+    "@types/node": "^24.0.3",
+    "concurrently": "^8.2.2"
   }
 }

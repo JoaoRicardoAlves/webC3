@@ -10,25 +10,130 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Project {
-  id          String @id @default(cuid())
-  name        String
-  progress    Int    @default(0) // Progresso de 0 a 100
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  password    String
+  firstName   String
+  lastName    String
+  avatar      String?
+  role        UserRole @default(USER)
+  isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  // Relations
+  projects    Project[]
+  activities  Activity[]
+
+  @@map("users")
 }
 
-// Modelo para dados gerais do dashboard
+model Project {
+  id          String        @id @default(cuid())
+  name        String
+  description String?
+  progress    Int           @default(0) // Progress from 0 to 100
+  status      ProjectStatus @default(ACTIVE)
+  priority    Priority      @default(MEDIUM)
+  startDate   DateTime?
+  endDate     DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Relations
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks       Task[]
+  activities  Activity[]
+
+  @@map("projects")
+}
+
+model Task {
+  id          String     @id @default(cuid())
+  title       String
+  description String?
+  completed   Boolean    @default(false)
+  priority    Priority   @default(MEDIUM)
+  dueDate     DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  // Relations
+  projectId   String
+  project     Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("tasks")
+}
+
+model Activity {
+  id          String       @id @default(cuid())
+  type        ActivityType
+  title       String
+  description String?
+  metadata    Json?        // Store additional data as JSON
+  createdAt   DateTime     @default(now())
+
+  // Relations
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId   String?
+  project     Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@map("activities")
+}
+
+// Dashboard metrics model (keeping your existing structure)
 model DashboardMetric {
   id              String  @id @default(cuid())
   earningsMonthly Decimal
   earningsAnnual  Decimal
   tasksPercentage Int
   pendingRequests Int
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("dashboard_metrics")
 }
 
 model RevenueSource {
-    id          String  @id @default(cuid())
-    sourceName  String  // "Direct", "Social", "Referral"
-    value       Int     // Valor para o gráfico de rosca
+  id          String   @id @default(cuid())
+  sourceName  String   // "Direct", "Social", "Referral"
+  value       Int      // Value for the donut chart
+  color       String?  // Hex color for chart visualization
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("revenue_sources")
+}
+
+// Enums
+enum UserRole {
+  ADMIN
+  USER
+}
+
+enum ProjectStatus {
+  ACTIVE
+  COMPLETED
+  ON_HOLD
+  CANCELLED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum ActivityType {
+  PROJECT_CREATED
+  PROJECT_UPDATED
+  PROJECT_COMPLETED
+  TASK_CREATED
+  TASK_COMPLETED
+  USER_LOGIN
+  USER_REGISTERED
 }
