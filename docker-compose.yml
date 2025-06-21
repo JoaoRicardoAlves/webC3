@@ -1,0 +1,28 @@
+# dashboard-app/docker-compose.yml
+
+version: '3.8' # Especifica a versão da sintaxe do Compose
+
+services:
+  # Define o nosso serviço de banco de dados
+  db:
+    image: postgres:14-alpine   # Usa a imagem oficial do PostgreSQL (versão 14, leve)
+    container_name: dashboard_db # Nomeia o container para fácil identificação
+    restart: always             # Reinicia o container automaticamente se ele parar
+
+    # Variáveis de ambiente para configurar o banco de dados
+    environment:
+      POSTGRES_USER: myuser             # Define o nome de usuário
+      POSTGRES_PASSWORD: mysecretpassword   # Define a senha
+      POSTGRES_DB: mydb                 # Define o nome do banco de dados que será criado
+
+    # Mapeia a porta do container para a porta da sua máquina
+    ports:
+      - "5432:5432" # Expõe a porta 5432 do container na porta 5432 do seu PC
+
+    # Garante que os dados do banco não sejam perdidos ao reiniciar o container
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+# Define o volume para persistir os dados
+volumes:
+  postgres_data:
